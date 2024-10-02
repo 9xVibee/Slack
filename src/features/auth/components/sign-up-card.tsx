@@ -13,15 +13,48 @@ import { FaGithub } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { SignInFlow } from '../types';
 import { useState } from 'react';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { TriangleAlert } from 'lucide-react';
 
 interface SignInCardProps {
   setState: (prop: SignInFlow) => void;
 }
 
 const SignUpCard = ({ setState }: SignInCardProps) => {
+  const { signIn } = useAuthActions();
+
+  /* ---------------- STATES ------------------ */
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+
+  /* ---------------- FUNCTIONS ------------------ */
+  const passwordSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setIsLoading(true);
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+
+    signIn('password', { email, password, flow: 'signUp' })
+      .catch((error) => {
+        console.log('error in SignUpCard', error);
+        setError('Invalid email or password');
+      })
+      .finally(() => setIsLoading(false));
+  };
+
+  const handleProviderSignIn = (value: 'github' | 'google') => {
+    setIsLoading(true);
+    signIn(value).finally(() => setIsLoading(false));
+  };
 
   return (
     <Card className="w-full h-full p-8">
@@ -31,10 +64,18 @@ const SignUpCard = ({ setState }: SignInCardProps) => {
           Use your email or another service to continue
         </CardDescription>
       </CardHeader>
+
+      {!!error && (
+        <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6">
+          <TriangleAlert className="size-4" />
+          <p>{error}</p>
+        </div>
+      )}
+
       <CardContent className="space-y-5 px-0 pb-0">
-        <form className="space-y-2.5 px-0 pb-0">
+        <form onSubmit={passwordSignUp} className="space-y-2.5 px-0 pb-0">
           <Input
-            disabled={false}
+            disabled={isLoading}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
@@ -43,7 +84,7 @@ const SignUpCard = ({ setState }: SignInCardProps) => {
           />
 
           <Input
-            disabled={false}
+            disabled={isLoading}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             type="password"
@@ -52,7 +93,7 @@ const SignUpCard = ({ setState }: SignInCardProps) => {
           />
 
           <Input
-            disabled={false}
+            disabled={isLoading}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             type="password"
@@ -60,7 +101,12 @@ const SignUpCard = ({ setState }: SignInCardProps) => {
             required
           />
 
-          <Button type="submit" className="w-full" size={'lg'} disabled={false}>
+          <Button
+            type="submit"
+            className="w-full"
+            size={'lg'}
+            disabled={isLoading}
+          >
             Continue
           </Button>
         </form>
@@ -69,8 +115,8 @@ const SignUpCard = ({ setState }: SignInCardProps) => {
 
         <div className="flex flex-col gap-y-2.5">
           <Button
-            disabled={false}
-            onClick={() => {}}
+            disabled={isLoading}
+            onClick={() => handleProviderSignIn('google')}
             variant={'outline'}
             size={'lg'}
             className="relative w-full"
@@ -80,8 +126,8 @@ const SignUpCard = ({ setState }: SignInCardProps) => {
           </Button>
 
           <Button
-            disabled={false}
-            onClick={() => {}}
+            disabled={isLoading}
+            onClick={() => handleProviderSignIn('github')}
             variant={'outline'}
             size={'lg'}
             className="relative w-full"
