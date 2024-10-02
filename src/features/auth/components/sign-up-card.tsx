@@ -24,6 +24,7 @@ const SignUpCard = ({ setState }: SignInCardProps) => {
   const { signIn } = useAuthActions();
 
   /* ---------------- STATES ------------------ */
+  const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -43,7 +44,7 @@ const SignUpCard = ({ setState }: SignInCardProps) => {
       return;
     }
 
-    signIn('password', { email, password, flow: 'signUp' })
+    signIn('password', { name, email, password, flow: 'signUp' })
       .catch((error) => {
         console.log('error in SignUpCard', error);
         setError('Invalid email or password');
@@ -74,6 +75,15 @@ const SignUpCard = ({ setState }: SignInCardProps) => {
 
       <CardContent className="space-y-5 px-0 pb-0">
         <form onSubmit={passwordSignUp} className="space-y-2.5 px-0 pb-0">
+          <Input
+            disabled={isLoading}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            type="text"
+            placeholder="Name"
+            required
+          />
+
           <Input
             disabled={isLoading}
             value={email}
