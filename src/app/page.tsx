@@ -1,8 +1,7 @@
-import AuthScreen from '@/features/auth/components/auth-screen';
 import React from 'react';
 
 const Home = () => {
-  return <AuthScreen />;
+  return <h1>Home page</h1>;
 };
 
 export default Home;
